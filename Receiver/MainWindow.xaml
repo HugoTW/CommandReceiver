@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Receiver"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Receiver" Height="350" Width="525">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="19*"/>
+            <ColumnDefinition Width="68*"/>
+            <ColumnDefinition Width="52*"/>
+            <ColumnDefinition Width="210*"/>
+            <ColumnDefinition Width="168*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Command Received :" HorizontalAlignment="Left" Margin="13,64,0,0" VerticalAlignment="Top" FontSize="22" Width="220" Grid.ColumnSpan="4"/>
+        <Label x:Name="txtCommandReceived" Content="#000000" HorizontalAlignment="Left" Margin="98.703,64,0,0" VerticalAlignment="Top" FontSize="22" Width="220" Grid.ColumnSpan="2" Grid.Column="3"/>
+        <Button Grid.ColumnSpan="3" Content="Read Shared Memory" Grid.Column="1" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="249" FontSize="22" Click="ReadSharedMemory" Visibility="Visible"/>
+        <Button Grid.ColumnSpan="3" Content="Read Command" Grid.Column="1" HorizontalAlignment="Left" Margin="10,179,0,0" VerticalAlignment="Top" Width="249" FontSize="22" Click="ReadCommand" Visibility="Visible"/>
+
     </Grid>
 </Window>
