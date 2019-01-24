@@ -20,6 +20,7 @@ using System.Timers;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+
 namespace Receiver
 {
     /// <summary>
@@ -42,15 +43,158 @@ namespace Receiver
         public string perviousCommandMsg;
 
 
-        public MainWindow()
+        private const string MutexName = "MUTEX_SINGLEINSTANCEANDNAMEDPIPE";
+        private bool _firstApplicationInstance;
+        private Mutex _mutexApplication;
+
+
+        static void myReceive(string[] args)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                Console.WriteLine("Moz MSG " + i.ToString() + ": " + args[i]);
+            }
+        }
+
+
+  
+
+            public MainWindow()
         {
 
-            InitializeComponent();
-            InitializeMappedReaderTimer();
+            //InitializeComponent();
+            //InitializeMappedReaderTimer();
+
+            string[] args = Environment.GetCommandLineArgs();
+            Debug.WriteLine("Moz args from  MainWindow : " + args[0]);
+
+            //VerifyInstance();
+
+           // /*
+
+            // First instance
+            if (IsApplicationFirstInstance())
+            {
+                // Yes
+                // Do something
+                InitializeComponent();
+                Debug.WriteLine("Moz - First Instance");
+                this.txtCommandReceived.Content = "First Instance";
+
+
+
+            }
+            else
+            {
+                Debug.WriteLine("Moz - Other Instance");
+                // Close down
+
+                if (_mutexApplication != null)
+                {
+                    Debug.WriteLine("Moz -_mutexApplication not null");
+                    _mutexApplication.Dispose();
+                }
+                Close();
+                this.txtCommandReceived.Content = "~~~~~~~~Good Job";
+
+            }
+
+            ReadCommand(this, null);
+
+
+            // */
+        }
+
+        void ReadCommand(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("Moz -ReadCommand 0 ");
+
+            try
+            {
+         
+
+                if (txtCommandReceived == null)
+                {
+                    Debug.WriteLine("Moz -ReadCommand 1 ");
+                    Debug.WriteLine("Moz -txtCommandReceived is null !!!");
+                    //return;
+                }
+
+                Debug.WriteLine("Moz -ReadCommand 2");
+                Debug.WriteLine("Moz - Rceciver :ReadCommand");
+
+                string[] args = Environment.GetCommandLineArgs();
+                //txtCommandReceived.Content = args[0];
+
+                Debug.WriteLine("Moz - Args :", args);
+
+                for (int index = 1; index < args.Length; index += 2)
+                {
+                    string arg = args[index].Replace("-", "");
+                    arguments.Add(arg, args[index + 1]);
+                    Debug.WriteLine("Moz command :" + arg);
+
+                }
+
+                if (arguments.ContainsKey("color"))
+                {
+                    Debug.WriteLine("Moz command received:" + arguments["color"]);
+                    //txtCommandReceived.Content = arguments["color"];
+                }
+            }
+            catch (Exception err)
+            {
+                Debug.WriteLine("Moz - error", err.Message);
+
+                txtCommandReceived.Content = err.Message;
+
+            }
 
         }
 
-      
+
+        void VerifyInstance()
+        {
+            // test if this is the first instance and register receiver, if so.
+            if (SingletonController.IamFirst(new SingletonController.ReceiveDelegate(myReceive)))
+            {
+                //// OK, this is the first instance, now run whatever you want ...
+                //for (int i = 0; i < 50; i++)
+                //{
+                //    Debug.WriteLine("Moz Hi " + i.ToString());
+                //    System.Threading.Thread.Sleep(1000);
+                //}
+
+                // Allow for multiple runs but only try and get the mutex once
+                //if (_mutexApplication == null)
+                //{
+                //    _mutexApplication = new Mutex(true, MutexName, out _firstApplicationInstance);
+                //}
+
+
+            }
+            else
+            {
+                Debug.WriteLine("Moz args from new intance " + Environment.GetCommandLineArgs());
+                // send command line args to running app, then terminate
+                SingletonController.Send(Environment.GetCommandLineArgs());
+            }
+
+            ReadCommand(this, null);
+            SingletonController.Cleanup();
+        }
+
+        private bool IsApplicationFirstInstance()
+        {
+            // Allow for multiple runs but only try and get the mutex once
+            if (_mutexApplication == null)
+            {
+                Debug.WriteLine("Moz - _mutexApplication == null");
+                _mutexApplication = new Mutex(true, MutexName, out _firstApplicationInstance);
+            }
+
+            return _firstApplicationInstance;
+        }
 
         private void InitializeMappedReaderTimer()
         {
@@ -120,34 +264,6 @@ namespace Receiver
 
         }
 
-        void ReadCommand(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string[] args = Environment.GetCommandLineArgs();
-                txtCommandReceived.Content = args;
-
-                for (int index = 1; index < args.Length; index += 2)
-                {
-                    string arg = args[index].Replace("-", "");
-                    arguments.Add(arg, args[index + 1]);
-                }
-
-                if (arguments.ContainsKey("color"))
-                {
-                    Debug.WriteLine("command received:" + arguments["color"]);
-                    txtCommandReceived.Content = arguments["color"];
-                }
-            }
-            catch (Exception err)
-            {
-
-                txtCommandReceived.Content = err.Message;
-
-            }
-
-
-        }
 
         public void TestFun()
         {
