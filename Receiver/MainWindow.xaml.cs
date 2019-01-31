@@ -27,10 +27,11 @@ namespace Receiver
      public  partial class MainWindow : Window
     {
         Dictionary<string, string> arguments = new Dictionary<string, string>();
+
         private const string MutexName = "YOUR_MUTEX_XXXX_SINGLE_INSTANCE_AND_NAMEDPIPE";
+        private const string commandName = "color";
 
         static public MainWindow mainWindow;
-
 
         static void myReceive(string[] args)
         {
@@ -41,7 +42,6 @@ namespace Receiver
 
             mainWindow.ReadCommand(args);
         }
-
 
 
         [STAThread]
@@ -81,22 +81,20 @@ namespace Receiver
 
             try
             {
-                
                 for (int index = 0; index < args.Length; index += 2)
                 {
                     string arg = args[index].Replace("-", "");
                     arguments.Add(arg, args[index + 1]);
                     Debug.WriteLine("Moz command :" + arg);
-
                 }
 
-                if (arguments.ContainsKey("color"))
+                if (arguments.ContainsKey( commandName ))
                 {
-                    Debug.WriteLine("Moz command received:" + arguments["color"]);
+                    Debug.WriteLine("Moz command received:" + arguments[commandName]);
 
                     this.Dispatcher.Invoke(() =>
                     {
-                        txtCommandReceived.Content = arguments["color"];
+                        txtCommandReceived.Content = arguments[commandName];
                     });
 
                     arguments.Clear();
@@ -118,9 +116,6 @@ namespace Receiver
         }
 
     }
-
-
-  
 
 
 }
